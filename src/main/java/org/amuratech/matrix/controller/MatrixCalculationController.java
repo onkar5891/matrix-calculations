@@ -29,7 +29,7 @@ public class MatrixCalculationController {
 
     @PutMapping(value = "/longest-sub-matrix", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity findLongestSubMatrix(@Valid @RequestBody LongestSubMatrixRequest subMatrixRequest) {
-        MatrixEvaluationMode evaluation = findEvaluationFor(subMatrixRequest.getEvaluationMode());
+        MatrixEvaluationMode evaluation = findEvaluationMode(subMatrixRequest.getEvaluationMode());
         Optional<LongestSubMatrixResponse> longestSubMatrix = matrixCalculationService.findLongestSubMatrix(subMatrixRequest.getMatrix(), evaluation);
 
         if (longestSubMatrix.isPresent()) {
@@ -39,9 +39,9 @@ public class MatrixCalculationController {
         return ResponseEntity.ok(new ApiResponse("No longest sub-matrix exists", Collections.emptyList()));
     }
 
-    private MatrixEvaluationMode findEvaluationFor(String evaluateFor) {
+    private MatrixEvaluationMode findEvaluationMode(String evaluationMode) {
         try {
-            return MatrixEvaluationMode.valueOf(evaluateFor);
+            return MatrixEvaluationMode.valueOf(evaluationMode);
         } catch (IllegalArgumentException e) {
             throw new InvalidInputException("Permitted values for 'evaluationMode': " + Arrays.toString(MatrixEvaluationMode.values()));
         }
