@@ -4,13 +4,13 @@
 * To run the test cases, execute **``mvn test``**
 * To run the application, execute **``mvn spring-boot:run``**
 * Request
-  - PATH: PUT /amura-tech/matrix-calculations/longest-sub-matrix
-  - HEADER: Authorization=Basic ${app.secret-token}
+  - PATH: **``PUT /amura-tech/matrix-calculations/longest-sub-matrix``**
+  - HEADER: **``Authorization=Basic ${app.secret-token}``**
   - BODY:
-  {
+  **``{
     "matrix": ${a-two-dimensional-array},
     "evaluationMode": ${ZEROES | ONES}
-  }
+  }``**
 
 
 ## TODO ##
