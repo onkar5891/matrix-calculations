@@ -1,11 +1,11 @@
 package org.amuratech.matrix.controller;
 
+import org.amuratech.matrix.datatransfer.ApiResponse;
 import org.amuratech.matrix.datatransfer.LongestSubMatrixRequest;
 import org.amuratech.matrix.datatransfer.LongestSubMatrixResponse;
 import org.amuratech.matrix.enums.MatrixEvaluationMode;
 import org.amuratech.matrix.exception.InvalidInputException;
 import org.amuratech.matrix.service.MatrixCalculationService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/matrix-calculations")
@@ -28,9 +30,13 @@ public class MatrixCalculationController {
     @PutMapping(value = "/longest-sub-matrix", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity findLongestSubMatrix(@Valid @RequestBody LongestSubMatrixRequest subMatrixRequest) {
         MatrixEvaluationMode evaluation = findEvaluationFor(subMatrixRequest.getEvaluationMode());
-        LongestSubMatrixResponse longestSubMatrix = matrixCalculationService.findLongestSubMatrix(subMatrixRequest.getMatrix(), evaluation);
+        Optional<LongestSubMatrixResponse> longestSubMatrix = matrixCalculationService.findLongestSubMatrix(subMatrixRequest.getMatrix(), evaluation);
 
-        return ResponseEntity.ok(longestSubMatrix);
+        if (longestSubMatrix.isPresent()) {
+            return ResponseEntity.ok(longestSubMatrix);
+        }
+
+        return ResponseEntity.ok(new ApiResponse("No longest sub-matrix exists", Collections.emptyList()));
     }
 
     private MatrixEvaluationMode findEvaluationFor(String evaluateFor) {

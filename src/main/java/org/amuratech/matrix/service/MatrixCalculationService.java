@@ -9,16 +9,21 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.Optional;
 
 @Service
 public class MatrixCalculationService {
-    public LongestSubMatrixResponse findLongestSubMatrix(int[][] matrix, MatrixEvaluationMode evaluationMode) {
+    public Optional<LongestSubMatrixResponse> findLongestSubMatrix(int[][] matrix, MatrixEvaluationMode evaluationMode) {
         doValidate(matrix);
 
         // if needed to evaluate sub-matrix for 0s, make 1s as 0s and vice versa
         invertIfRequired(matrix, evaluationMode);
 
         MaxAreaOfMatrix areaOfMatrix = findMaxAreaCoveredByMatrix(matrix);
+        if (!areaOfMatrix.found()) {
+            return Optional.empty();
+        }
+
         int height = areaOfMatrix.area / areaOfMatrix.width;
         int column = areaOfMatrix.columnEnd - areaOfMatrix.width + 1;
         int row = areaOfMatrix.row - height + 1;
@@ -26,15 +31,16 @@ public class MatrixCalculationService {
         // invert the matrix again to get back the original one
         invertIfRequired(matrix, evaluationMode);
 
-        return
-                LongestSubMatrixResponse
-                        .builder()
-                        .row(row)
-                        .column(column)
-                        .width(areaOfMatrix.width)
-                        .height(height)
-                        .area(areaOfMatrix.area)
-                        .build();
+        return Optional.of(
+            LongestSubMatrixResponse
+                .builder()
+                .row(row)
+                .column(column)
+                .width(areaOfMatrix.width)
+                .height(height)
+                .area(areaOfMatrix.area)
+                .build()
+        );
     }
 
     private void invertIfRequired(int[][] matrix, MatrixEvaluationMode evaluationMode) {
@@ -52,13 +58,7 @@ public class MatrixCalculationService {
     }
 
     private MaxAreaOfMatrix findMaxAreaCoveredByMatrix(int[][] matrix) {
-        for (int i = 1; i < matrix.length; i++) {
-            for (int j = 0; j < matrix[i].length; j++) {
-                if (matrix[i][j] == 1) {
-                    matrix[i][j] += matrix[i - 1][j];
-                }
-            }
-        }
+        createHistogramOfAllRows(matrix);
 
         MaxAreaOfMatrix maxAreaOfMatrix = new MaxAreaOfMatrix();
         for (int i = 0; i < matrix.length; i++) {
@@ -71,6 +71,12 @@ public class MatrixCalculationService {
             }
         }
 
+        revertHistogramOfAllRows(matrix);
+
+        return maxAreaOfMatrix;
+    }
+
+    private void revertHistogramOfAllRows(int[][] matrix) {
         for (int i = matrix.length - 1; i > 0; i--) {
             for (int j = 0; j < matrix[i].length; j++) {
                 if (matrix[i][j] != 0) {
@@ -78,8 +84,16 @@ public class MatrixCalculationService {
                 }
             }
         }
+    }
 
-        return maxAreaOfMatrix;
+    private void createHistogramOfAllRows(int[][] matrix) {
+        for (int i = 1; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                if (matrix[i][j] == 1) {
+                    matrix[i][j] += matrix[i - 1][j];
+                }
+            }
+        }
     }
 
     private MaxAreaOfMatrixRow findMaxAreaCoveredByMatrixRow(int[] histogram) {
@@ -143,15 +157,19 @@ public class MatrixCalculationService {
 
     @ToString
     private class MaxAreaOfMatrixRow {
-        private int area = -1;
+        private int area = 0;
         private int columnEnd = -1;
-        private int width = -1;
+        private int width = 0;
     }
 
     private class MaxAreaOfMatrix {
-        private int area = -1;
+        private int area = 0;
         private int row = -1;
         private int columnEnd = -1;
-        private int width = -1;
+        private int width = 0;
+
+        private boolean found() {
+            return row >= 0 && columnEnd >= 0;
+        }
     }
 }

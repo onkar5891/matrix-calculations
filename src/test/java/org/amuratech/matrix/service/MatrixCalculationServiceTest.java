@@ -6,6 +6,8 @@ import org.amuratech.matrix.exception.InvalidInputException;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Optional;
+
 import static org.junit.Assert.assertEquals;
 
 public class MatrixCalculationServiceTest {
@@ -25,10 +27,15 @@ public class MatrixCalculationServiceTest {
         {1, 1}
     };
 
-    private static final int[][] MATRIX_3x3 = {
+    private static final int[][] MATRIX1_3x3 = {
         { 1, 1, 0 },
         { 1, 1, 1 },
         { 0, 1, 0 }
+    };
+    private static final int[][] MATRIX2_3x3 = {
+        { 0, 0, 0 },
+        { 0, 0, 0 },
+        { 0, 0, 0 }
     };
 
     private static final int[][] MATRIX_5x4 = {
@@ -73,7 +80,8 @@ public class MatrixCalculationServiceTest {
         { MATRIX1_2x2, MatrixEvaluationMode.ONES,   0,     0,        1,       1        },
         { MATRIX2_2x2, MatrixEvaluationMode.ONES,   0,     0,        1,       2        },
         { MATRIX2_2x2, MatrixEvaluationMode.ZEROES, 0,     1,        1,       1        },
-        { MATRIX_3x3,  MatrixEvaluationMode.ONES,   0,     0,        2,       2        },
+        { MATRIX1_3x3, MatrixEvaluationMode.ONES,   0,     0,        2,       2        },
+        { MATRIX2_3x3, MatrixEvaluationMode.ONES,   -1,    -1,       0,       0        },
         { MATRIX_5x4,  MatrixEvaluationMode.ONES,   1,     0,        3,       4        },
         { MATRIX1_4x6, MatrixEvaluationMode.ONES,   0,     3,        2,       4        },
         { MATRIX2_4x6, MatrixEvaluationMode.ONES,   1,     1,        3,       2        },
@@ -116,9 +124,12 @@ public class MatrixCalculationServiceTest {
             int column = (int) matrices[i][3];
             int width = (int) matrices[i][4];
             int height = (int) matrices[i][5];
+            final int scenario = i;
 
-            LongestSubMatrixResponse subMatrix = matrixCalculationService.findLongestSubMatrix(matrix, evaluation);
-            assertSubMatrixDimensions("SCENARIO " + i, subMatrix, row, column, width, height);
+            Optional<LongestSubMatrixResponse> subMatrixOpt = matrixCalculationService.findLongestSubMatrix(matrix, evaluation);
+            subMatrixOpt.ifPresent(subMatrix ->
+                assertSubMatrixDimensions("SCENARIO " + scenario, subMatrix, row, column, width, height)
+            );
         }
     }
 

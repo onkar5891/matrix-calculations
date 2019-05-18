@@ -109,6 +109,24 @@ class LongestSubMatrixSpec extends Specification {
                 .andExpect(jsonPath("area", is(14)))
     }
 
+    def "SCENARIO 3: If longest sub-matrix is not found, return correct message"() {
+        def authorization = "Basic ${secretToken}"
+
+        when: "I request to calculate longest sub-matrix with all 0s"
+        def matrixOperation = mockMvc.perform(
+                put(REQUEST_PATH_LONGEST_SUB_MATRIX)
+                        .header(HEADER_AUTHORIZATION_KEY, authorization)
+                        .accept(MediaType.APPLICATION_JSON_VALUE)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(readFileData("request-data/matrix-with-all-0s.json"))
+        )
+
+        then: "Correct sub-matrix dimensions should be returned"
+        matrixOperation
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("message", is("No longest sub-matrix exists")))
+    }
+
     byte[] readFileData(String jsonFileName) {
         def jsonInput = this.getClass().getClassLoader().getResourceAsStream(jsonFileName)
         assertNotNull(jsonInput)
